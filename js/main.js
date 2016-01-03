@@ -4,6 +4,8 @@ window.onload = function () {
 	var AUDIO_DESTINATION_DIRECTORY = '/opt/usr/media/Sounds';
 	var fileName = 'audio.amr';
 	var fileFormat = 'amr';
+    var busy = false;
+    var audioControl = null;
 	
     // add eventListener for tizenhwkey
     document.addEventListener('tizenhwkey', function(e) {
@@ -11,9 +13,12 @@ window.onload = function () {
             tizen.application.getCurrentApplication().exit();
     });
     
-   // document.addEventListener('models.stream.ready', onStreamReady);
+    // TODO 度々失敗するので、再起動すれば治る
+    navigator.webkitGetUserMedia({audio:true}, registerStream, function(error){
+    	console.log('error user media:' + error.message);
+    });
 
-    // Sample code
+    // test用ボタンイベント
     var textbox = document.querySelector('.contents');
     textbox.addEventListener("click", function(){
     	box = document.querySelector('#textbox');
@@ -21,16 +26,9 @@ window.onload = function () {
     	
         //    
     	startRecording();
-        
     });
-    
-    var busy = false;
-    var audioControl = null;
-    
+
     console.log('request media');
-    navigator.webkitGetUserMedia({audio:true}, registerStream, function(error){
-    	console.log('error user media:' + error.message);
-    });
     
     function registerStream(mediaStream) {
     	console.log('register stream');
@@ -58,8 +56,6 @@ window.onload = function () {
             return false;
         }
 
-        
-        
         var stopRequested = false;
         busy = true;
         
@@ -83,17 +79,11 @@ window.onload = function () {
         setTimeout(
         	function(){
                stopRecording();
-               testPost();
+               uploadAudioFile();
             }, 5000
         );
-
- 
     }
-    
-    function postVoice(){
-    
-    }
-    
+   
     function onAudioSettingsApplied() {
 
     }
@@ -120,14 +110,13 @@ window.onload = function () {
     }
     
     
-    function testPost(){
+    function uploadAudioFile(){
     	  var url = "http://attdevtest.mybluemix.net/voice";
     	  ur = "http://localhost:6001/voice";
     	  var xhr = new XMLHttpRequest();
     	  
           var audioPath = AUDIO_DESTINATION_DIRECTORY + '/' + fileName;
           
-          console.log('file open:' + 'file://' + audioPath);
           tizen.filesystem.resolve(
         		    'file://' + audioPath,
         		    function(dir) {
@@ -145,7 +134,6 @@ window.onload = function () {
         		                    var array = [];
         		                    for(var i=0; i< bt.length; i++) {
         		                    	array[i] = [bt[i] +  "\n"]   
-        		                    	//console.log(i);
         		                    }
         		                    var blob = new Blob(array, {type : 'audio/mpeg'});
         		                    
@@ -161,11 +149,12 @@ window.onload = function () {
         		            		    console.log('true:' + xhr.responseText);
         		            		};
         		                    var formData = new FormData();
-        		                //   formData.append("__VIEWSTATE", "jjj=");
+        		                
         		                    formData.append("FileUploadControl", blob, "mmm.wav");
-        		                ///    formData.append("UploadButton", "Upload");
+        		               //   formData.append("__VIEWSTATE", "jjj=");
+        		               //    formData.append("UploadButton", "Upload");
 
-        		            		xhr.setRequestHeader('Content-Type','audio/wav');
+        		            		xhr.setRequestHeader('Content-Type','audio/AMR');
         		            	  
         		            		xhr.send(formData);  //
         		                    fs.close();
@@ -181,48 +170,5 @@ window.onload = function () {
         		        console.log("Error" + e.message);
         		    }, "rw"
         		);
-          
-          
-          
-          
-          /*
-    	
-    	  xhr.open('POST', url, true);
-    	  xhr.onload = function(e) {
-    	    console.log('onload:' + e);
-    	  };
-    	  xhr.onreadystatechange = function() {
-    		    if (xhr.readyState == 4 && xhr.status == 200) {
-    		    	console.log('true:' + xhr.responseText);
-    		    }
-    		    console.log( 'scode:' + xhr.status + ', ready state' + xhr.readyState);
-    		};
-
-    	  xhr.setRequestHeader('Content-Type','audio/wav');
-    	  
-    	  xhr.send(null);  //
-    	  */
-    	
     }
-    
-    function testHhr() {
-    	var url = "http://attdevtest.mybluemix.net/";
-  	  var xhr = new XMLHttpRequest();
-  	
-  	  xhr.open('GET', url, true);
-  	  xhr.onload = function(e) {
-  	    console.log('onload:' + e);
-  	  };
-  	  xhr.onreadystatechange = function() {
-  		    if (xhr.readyState == 4 && xhr.status == 200) {
-  		    	console.log('true:' + xhr.responseText);
-  		    }
-  		    console.log( 'scode:' + xhr.status + ', ready state' + xhr.readyState);
-  		};
-
-  	 // xhr.setRequestHeader('Content-Type','audio/wav');
-  	 // xhr.setRequestHeader('Access-Control-Allow-Origin','*');
-  	  xhr.send(null);  //
-    	
-    }  
 };
