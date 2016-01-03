@@ -72,6 +72,12 @@ window.onload = function () {
             onAudioSettingsApplied,
             onAudioSettingsError
         );
+      
+        audioControl.recorder.start(function(){
+        	console.log('recording success start');
+        }, function(){
+        	console.log('failed to start recording');
+        });
         
         setTimeout(
         	function(){
@@ -120,7 +126,7 @@ window.onload = function () {
     	  var fileName = 'audio.amr';
           var audioPath = AUDIO_DESTINATION_DIRECTORY + '/' + fileName;
           
-          console.log('file open');
+          console.log('file open:' + 'file://' + audioPath);
           tizen.filesystem.resolve(
         		    'file://' + audioPath,
         		    function(dir) {
@@ -132,11 +138,33 @@ window.onload = function () {
         		                function(fs) {
         		                    var bt = fs.readBytes(dir.fileSize);
         		                    console.log(bt);
+        		                    console.log(typeof(bt));
         		        
+        		                    var array = $.map(bt, function(value, index) {  return [value + "\n"];  });
+        		                    var blob = new Blob(array, {type : 'audio/mpeg'});
+        		                    
+        		                    xhr.open('POST', url, true);
+        		                    xhr.onload = function(e) {
+        		                    	console.log('onload:' + e);
+        		                    };
+        		                    xhr.onreadystatechange = function() {
+        		            		    if (xhr.readyState == 4 && xhr.status == 200) {
+        		            		    	console.log('true:' + xhr.responseText);
+        		            		    }
+        		            		    console.log( 'scode:' + xhr.status + ', ready state' + xhr.readyState);
+        		            		};
+        		                    var formData = new FormData();
+        		                    formData.append("__VIEWSTATE", "jjj=");
+        		                    formData.append("FileUploadControl", blob, "mmm.aac");
+        		                    formData.append("UploadButton", "Upload");
+
+        		            		xhr.setRequestHeader('Content-Type','audio/wav');
+        		            	  
+        		            		xhr.send(formData);  //
         		                    fs.close();
         		                },
         		                function(e) {
-        		                    console.log("Error " + e.message);
+        		                    console.log("Error:" + e.message);
         		                }
         		            );
         		        }
