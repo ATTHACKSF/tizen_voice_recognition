@@ -2,6 +2,8 @@ window.onload = function () {
     // TODO:: Do your initialization job
 
 	var AUDIO_DESTINATION_DIRECTORY = '/opt/usr/media/Sounds';
+	var fileName = 'audio.amr';
+	var fileFormat = 'amr';
 	
     // add eventListener for tizenhwkey
     document.addEventListener('tizenhwkey', function(e) {
@@ -50,8 +52,7 @@ window.onload = function () {
     
     function startRecording() {
     	console.log("start recording");
-        var settings = {},
-            fileName = '';
+        var settings = {};
 
         if (busy) {
             return false;
@@ -61,11 +62,11 @@ window.onload = function () {
         
         var stopRequested = false;
         busy = true;
-        fileName = 'audio.amr';
+        
         audioPath = AUDIO_DESTINATION_DIRECTORY + '/' + fileName;
 
         settings.fileName = fileName;
-        settings.recordingFormat = 'amr';
+        settings.recordingFormat = fileFormat;
 
         audioControl.recorder.applySettings(
             settings,
@@ -120,10 +121,10 @@ window.onload = function () {
     
     
     function testPost(){
-    	var url = "http://attdevtest.mybluemix.net/voice";
+    	  var url = "http://attdevtest.mybluemix.net/voice";
+    	  ur = "http://localhost:6001/voice";
     	  var xhr = new XMLHttpRequest();
     	  
-    	  var fileName = 'audio.amr';
           var audioPath = AUDIO_DESTINATION_DIRECTORY + '/' + fileName;
           
           console.log('file open:' + 'file://' + audioPath);
@@ -140,7 +141,12 @@ window.onload = function () {
         		                    console.log(bt);
         		                    console.log(typeof(bt));
         		        
-        		                    var array = $.map(bt, function(value, index) {  return [value + "\n"];  });
+        		          //          var array = $.map(bt, function(value, index) {  return [value + "\n"];  });
+        		                    var array = [];
+        		                    for(var i=0; i< bt.length; i++) {
+        		                    	array[i] = [bt[i] +  "\n"]   
+        		                    	//console.log(i);
+        		                    }
         		                    var blob = new Blob(array, {type : 'audio/mpeg'});
         		                    
         		                    xhr.open('POST', url, true);
@@ -152,11 +158,12 @@ window.onload = function () {
         		            		    	console.log('true:' + xhr.responseText);
         		            		    }
         		            		    console.log( 'scode:' + xhr.status + ', ready state' + xhr.readyState);
+        		            		    console.log('true:' + xhr.responseText);
         		            		};
         		                    var formData = new FormData();
-        		                    formData.append("__VIEWSTATE", "jjj=");
-        		                    formData.append("FileUploadControl", blob, "mmm.aac");
-        		                    formData.append("UploadButton", "Upload");
+        		                //   formData.append("__VIEWSTATE", "jjj=");
+        		                    formData.append("FileUploadControl", blob, "mmm.wav");
+        		                ///    formData.append("UploadButton", "Upload");
 
         		            		xhr.setRequestHeader('Content-Type','audio/wav');
         		            	  
